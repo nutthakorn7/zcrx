@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: zcrx-api
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=production
+      - PORT=8000
+      - JWT_SECRET=zcrx-super-secret-jwt-key-change-me
+      - DATABASE_PATH=/app/data/zcrx.db
+      - REPOS_PATH=/app/repos
+    volumes:
+      - zcrx-data:/app/data
+      - zcrx-repos:/app/repos
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:8000
+    container_name: zcrx-web
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    restart: unless-stopped
+
+volumes:
+  zcrx-data:
+  zcrx-repos:

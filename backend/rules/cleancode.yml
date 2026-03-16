@@ -1,0 +1,156 @@
+rules:
+  # ================================================
+  # CONSISTENT — follows consistent patterns
+  # ================================================
+  - id: cleancode.consistent.naming-convention-constant
+    patterns:
+      - pattern: const $VAR = ...
+      - metavariable-regex:
+          metavariable: $VAR
+          regex: "^[a-z].*[A-Z].*"
+    message: "Consider using UPPER_SNAKE_CASE for constants: $VAR"
+    severity: INFO
+    languages: [javascript, typescript]
+    metadata:
+      issueType: codeSmell
+      cleanCodeAttribute: consistent
+      quality: maintainability
+
+  - id: cleancode.consistent.no-var-declaration
+    pattern: var $X = ...
+    message: "Use 'const' or 'let' instead of 'var'. 'var' has function scope which can lead to unexpected behavior."
+    severity: WARNING
+    languages: [javascript, typescript]
+    metadata:
+      issueType: codeSmell
+      cleanCodeAttribute: consistent
+      quality: maintainability
+
+  # ================================================
+  # INTENTIONAL — code is clear about intent
+  # ================================================
+  - id: cleancode.intentional.no-magic-numbers
+    patterns:
+      - pattern: |
+          if ($X > $N) { ... }
+      - metavariable-regex:
+          metavariable: $N
+          regex: "^[0-9]{2,}$"
+    message: "Avoid magic numbers. Extract $N into a named constant for clarity."
+    severity: INFO
+    languages: [javascript, typescript]
+    metadata:
+      issueType: codeSmell
+      cleanCodeAttribute: intentional
+      quality: maintainability
+
+  - id: cleancode.intentional.no-empty-catch
+    pattern: |
+      try { ... } catch ($E) { }
+    message: "Empty catch block silently swallows errors. Handle the error or add a comment explaining why it's ignored."
+    severity: WARNING
+    languages: [javascript, typescript]
+    metadata:
+      issueType: bug
+      cleanCodeAttribute: intentional
+      quality: reliability
+
+  - id: cleancode.intentional.todo-in-code
+    pattern-regex: "//\\s*(TODO|FIXME|HACK|XXX)\\b"
+    message: "Found a TODO/FIXME comment. Track this in your issue tracker instead."
+    severity: INFO
+    languages: [javascript, typescript, python, java]
+    metadata:
+      issueType: codeSmell
+      cleanCodeAttribute: intentional
+      quality: maintainability
+
+  # ================================================
+  # ADAPTABLE — code can be easily changed
+  # ================================================
+  - id: cleancode.adaptable.deeply-nested-callbacks
+    pattern: |
+      $FN1(..., function(...) {
+        ...
+        $FN2(..., function(...) {
+          ...
+          $FN3(..., function(...) {
+            ...
+          })
+          ...
+        })
+        ...
+      })
+    message: "Deeply nested callbacks (callback hell). Consider using async/await or Promises."
+    severity: WARNING
+    languages: [javascript, typescript]
+    metadata:
+      issueType: codeSmell
+      cleanCodeAttribute: adaptable
+      quality: maintainability
+
+  - id: cleancode.adaptable.hardcoded-url
+    patterns:
+      - pattern-regex: "https?://[a-zA-Z0-9]+(\\.[a-zA-Z]+)+(:[0-9]+)?(/\\S*)?"
+      - pattern-not-regex: "localhost|127\\.0\\.0\\.1|example\\.com|npmjs\\.com|github\\.com"
+    message: "Hardcoded URL detected. Consider using environment variables or configuration."
+    severity: INFO
+    languages: [javascript, typescript, python]
+    metadata:
+      issueType: codeSmell
+      cleanCodeAttribute: adaptable
+      quality: maintainability
+
+  # ================================================
+  # RESPONSIBLE — handles resources/security properly
+  # ================================================
+  - id: cleancode.responsible.console-log-production
+    pattern: console.log(...)
+    message: "console.log() should not be used in production code. Use a proper logging library."
+    severity: INFO
+    languages: [javascript, typescript]
+    metadata:
+      issueType: codeSmell
+      cleanCodeAttribute: responsible
+      quality: maintainability
+
+  - id: cleancode.responsible.no-eval
+    pattern: eval(...)
+    message: "eval() executes arbitrary code and is a significant security risk."
+    severity: ERROR
+    languages: [javascript, typescript]
+    metadata:
+      issueType: vulnerability
+      cleanCodeAttribute: responsible
+      quality: security
+
+  - id: cleancode.responsible.unhandled-promise
+    patterns:
+      - pattern: $FN(...)
+      - metavariable-regex:
+          metavariable: $FN
+          regex: "(fetch|axios|request)"
+      - pattern-not: await $FN(...)
+      - pattern-not: $FN(...).then(...)
+      - pattern-not: $FN(...).catch(...)
+    message: "Promise from $FN() is not awaited or handled. This may cause unhandled rejections."
+    severity: WARNING
+    languages: [javascript, typescript]
+    metadata:
+      issueType: bug
+      cleanCodeAttribute: responsible
+      quality: reliability
+
+  - id: cleancode.responsible.password-in-variable-name
+    patterns:
+      - pattern: const $VAR = "..."
+      - metavariable-regex:
+          metavariable: $VAR
+          regex: ".*(password|passwd|pwd|secret|token|apikey|api_key).*"
+    message: "Variable '$VAR' appears to contain a hardcoded secret. Use environment variables."
+    severity: ERROR
+    languages: [javascript, typescript, python]
+    metadata:
+      issueType: vulnerability
+      cleanCodeAttribute: responsible
+      quality: security
